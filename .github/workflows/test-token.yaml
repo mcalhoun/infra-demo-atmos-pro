@@ -34,6 +34,8 @@ jobs:
             -H "Content-Type: application/json" \
             -d "{\"token\": \"$TOKEN\"}")
 
+          echo "$token_reposonse"|jq
+
           body=$(echo "$response" | head -n1)
           code=$(echo "$response" | tail -n1)
 
@@ -46,6 +48,7 @@ jobs:
           fi
 
           # Extract the JWT from the 'token' field in the response body
+          echo "$body" | jq
           echo "$body" | jq -r '.token' > jwt.txt
           echo "::add-mask::$(cat jwt.txt)"
           echo "✅ Token exchange successful"
