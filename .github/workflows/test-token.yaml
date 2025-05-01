@@ -48,7 +48,6 @@ jobs:
           fi
 
           # Extract the JWT from the 'token' field in the response body
-          echo "$body" | jq
           echo "$body" | jq -r '.data.token' > jwt.txt
           echo "::add-mask::$(cat jwt.txt)"
           echo "✅ Token exchange successful"
