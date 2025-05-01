@@ -17,18 +17,15 @@ jobs:
         run: |
           echo "Fetching OIDC token from GitHub with audience 'app.cloudposse.com'..."
 
-          # Properly construct the full request URL
           FULL_URL="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=app.cloudposse.com/auth/github-oidc/ws_3Uy96FDVTDhACWDFvHeqyygcfz3N"
 
-          # Fetch the token JSON payload
           token_response=$(curl -sSf -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$FULL_URL")
-
-          # Extract the 'value' field from the JSON
           echo "$token_response" | jq -r '.value' > oidc_token.txt
 
           echo "::add-mask::$(cat oidc_token.txt)"
 
       - name: Exchange OIDC token with your API
+        id: exchange-token
         run: |
           TOKEN=$(cat oidc_token.txt)
 
@@ -48,4 +45,28 @@ jobs:
             exit 1
           fi
 
+          # Save the JWT from the response
+          echo "$body" | jq -r '.jwt' > jwt.txt
+          echo "::add-mask::$(cat jwt.txt)"
           echo "✅ Token exchange successful"
+
+      - name: Call protected /api/auth/test endpoint
+        run: |
+          JWT=$(cat jwt.txt)
+
+          echo "Calling /api/auth/test with Bearer token..."
+          test_response=$(curl -s -w "\n%{http_code}" -X GET https://find-wisconsin-criterion-volunteers.trycloudflare.com/api/auth/test \
+            -H "Authorization: Bearer $JWT")
+
+          body=$(echo "$test_response" | head -n1)
+          code=$(echo "$test_response" | tail -n1)
+
+          echo "Status: $code"
+          echo "Response: $body"
+
+          if [ "$code" -ne 200 ]; then
+            echo "❌ Test API call failed"
+            exit 1
+          fi
+
+          echo "✅ Test API call succeeded"
