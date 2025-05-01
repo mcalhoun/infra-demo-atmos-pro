@@ -24,12 +24,12 @@ jobs:
 
           echo "::add-mask::$(cat oidc_token.txt)"
 
-      - name: Exchange OIDC token with your API
+      - name: Exchange OIDC token with Atmos Pro API
         id: exchange-token
         run: |
           TOKEN=$(cat oidc_token.txt)
 
-          echo "Sending token to your API..."
+          echo "Sending token to ATMOS Pro..."
           response=$(curl -s -w "\n%{http_code}" -X POST https://find-wisconsin-criterion-volunteers.trycloudflare.com/api/auth/github-oidc \
             -H "Content-Type: application/json" \
             -d "{\"token\": \"$TOKEN\"}")
