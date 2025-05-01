@@ -1,4 +1,4 @@
-name: Test Clerk Auth via GitHub Token
+name: Test Clerk Auth via GitHub OIDC
 
 on:
   workflow_dispatch:
@@ -8,21 +8,32 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
+      id-token: write  # Required to fetch OIDC token
       contents: read
-      id-token: write # Needed for OIDC if your endpoint uses it
-      actions: read
 
     steps:
-      - name: Send GITHUB_TOKEN to Clerk OIDC endpoint
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Request OIDC Token
+        id: get-token
         run: |
-          curl -sLS "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=app.cloudposse.com" -H "User-Agent: actions/oidc-client" -H "Authorization: ***"
-          OIDC_TOKEN=$(curl -sLS "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=app.cloudposse.com" -H "User-Agent: actions/oidc-client" -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN")
-          echo "Sending GitHub token to /api/auth/github-oidc..."
+          echo "Requesting GitHub OIDC token with audience 'app.cloudposse.com'..."
+
+          token_response=$(curl -sSf -X POST \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=app.cloudposse.com")
+
+          OIDC_TOKEN=$(echo "$token_response" | jq -r '.value')
+
+          echo "::add-mask::$OIDC_TOKEN"
+          echo "$OIDC_TOKEN" > oidc_token.txt
+
+      - name: Exchange OIDC token with your API
+        run: |
+          TOKEN=$(cat oidc_token.txt)
+          echo "Sending token to your API..."
+
           response=$(curl -s -w "\n%{http_code}" -X POST https://find-wisconsin-criterion-volunteers.trycloudflare.com/api/auth/github-oidc \
             -H "Content-Type: application/json" \
-            -d "{\"token\":\"$OIDC_TOKEN\"}")
+            -d "{\"token\": \"$TOKEN\"}")
 
           body=$(echo "$response" | head -n1)
           code=$(echo "$response" | tail -n1)
@@ -31,8 +42,8 @@ jobs:
           echo "Response: $body"
 
           if [ "$code" -ne 200 ]; then
-            echo "Failed to exchange GitHub token"
+            echo "❌ Token exchange failed"
             exit 1
           fi
 
-          echo "✅ Successfully exchanged GitHub token"
+          echo "✅ Token exchange successful"
