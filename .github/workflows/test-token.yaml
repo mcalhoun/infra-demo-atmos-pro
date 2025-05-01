@@ -18,7 +18,7 @@ jobs:
           echo "Fetching OIDC token from GitHub with audience 'app.cloudposse.com'..."
 
           # Properly construct the full request URL
-          FULL_URL="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=app.cloudposse.com"
+          FULL_URL="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=app.cloudposse.com/auth/github-oidc/ws_3Uy96FDVTDhACWDFvHeqyygcfz3N"
 
           # Fetch the token JSON payload
           token_response=$(curl -sSf -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$FULL_URL")
