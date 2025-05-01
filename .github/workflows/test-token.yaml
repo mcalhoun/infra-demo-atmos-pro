@@ -1,0 +1,36 @@
+name: Test Clerk Auth via GitHub Token
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-auth:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write # Needed for OIDC if your endpoint uses it
+      actions: read
+
+    steps:
+      - name: Send GITHUB_TOKEN to Clerk OIDC endpoint
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Sending GitHub token to /api/auth/github-oidc..."
+          response=$(curl -s -w "\n%{http_code}" -X POST https://find-wisconsin-criterion-volunteers.trycloudflare.com/api/auth/github-oidc \
+            -H "Content-Type: application/json" \
+            -d "{\"github_token\": \"$GITHUB_TOKEN\"}")
+
+          body=$(echo "$response" | head -n1)
+          code=$(echo "$response" | tail -n1)
+
+          echo "Status: $code"
+          echo "Response: $body"
+
+          if [ "$code" -ne 200 ]; then
+            echo "Failed to exchange GitHub token"
+            exit 1
+          fi
+
+          echo "✅ Successfully exchanged GitHub token"
