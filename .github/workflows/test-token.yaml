@@ -30,7 +30,7 @@ jobs:
           TOKEN=$(cat oidc_token.txt)
 
           echo "Sending token to ATMOS Pro..."
-          response=$(curl -s -w "\n%{http_code}" -X POST https://find-wisconsin-criterion-volunteers.trycloudflare.com/api/auth/github-oidc \
+          response=$(curl -s -w "\n%{http_code}" -X POST https://behavioral-buildings-jackets-eugene.trycloudflare.com/api/auth/github-oidc \
             -H "Content-Type: application/json" \
             -d "{\"token\": \"$TOKEN\"}")
 
@@ -57,7 +57,7 @@ jobs:
           JWT=$(cat jwt.txt)
 
           echo "Calling /api/auth/test with Bearer token..."
-          test_response=$(curl -s -w "\n%{http_code}" -X GET https://find-wisconsin-criterion-volunteers.trycloudflare.com/api/auth/test \
+          test_response=$(curl -s -w "\n%{http_code}" -X GET https://behavioral-buildings-jackets-eugene.trycloudflare.com/api/auth/test \
             -H "Authorization: Bearer $JWT")
 
           body=$(echo "$test_response" | head -n1)
