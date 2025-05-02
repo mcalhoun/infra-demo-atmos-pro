@@ -29,7 +29,7 @@ jobs:
         run: |
           TOKEN=$(cat oidc_token.txt)
 
-          echo "Sending token to ATMOS Pro..."
+          echo "Sending GH OIDC token to ATMOS Pro..."
           response=$(curl -s -w "\n%{http_code}" -X POST https://behavioral-buildings-jackets-eugene.trycloudflare.com/api/auth/github-oidc \
             -H "Content-Type: application/json" \
             -d "{\"token\": \"$TOKEN\"}")
