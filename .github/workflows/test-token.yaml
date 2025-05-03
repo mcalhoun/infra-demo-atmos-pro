@@ -32,7 +32,7 @@ jobs:
           echo "Sending GH OIDC token to ATMOS Pro..."
           response=$(curl -s -w "\n%{http_code}" -X POST https://app.cloudposse.com/api/auth/github-oidc \
             -H "Content-Type: application/json" \
-            -d "{\"token\": \"$TOKEN\",\"workspaceId\":\"ws_3Uy96FDVTDhACWDFvHeqyygcfz3N\"}")
+            -d "{\"token\": \"$TOKEN\",\"workspaceId\":\"ws_2UixCVnf1KrnkvViUyvT4kaWvcvD\"}")
 
           echo "$token_reposonse"|jq
 
