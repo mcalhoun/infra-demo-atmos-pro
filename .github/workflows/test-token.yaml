@@ -17,7 +17,7 @@ jobs:
         run: |
           echo "Fetching OIDC token from GitHub with audience 'app.cloudposse.com'..."
 
-          FULL_URL="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=app.cloudposse.com/auth/github-oidc/ws_3Uy96FDVTDhACWDFvHeqyygcfz3N"
+          FULL_URL="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=app.cloudposse.com"
 
           token_response=$(curl -sSf -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$FULL_URL")
           echo "$token_response" | jq -r '.value' > oidc_token.txt
@@ -32,7 +32,7 @@ jobs:
           echo "Sending GH OIDC token to ATMOS Pro..."
           response=$(curl -s -w "\n%{http_code}" -X POST https://ngrok.mattcalhoun.com/api/auth/github-oidc \
             -H "Content-Type: application/json" \
-            -d "{\"token\": \"$TOKEN\"}")
+            -d "{\"token\": \"$TOKEN\",\"workspaceId\":\"ws_3Uy96FDVTDhACWDFvHeqyygcfz3N"}")
 
           echo "$token_reposonse"|jq
 
