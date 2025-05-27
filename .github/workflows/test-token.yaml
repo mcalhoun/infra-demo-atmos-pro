@@ -20,9 +20,10 @@ jobs:
           FULL_URL="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=app.cloudposse.com"
 
           token_response=$(curl -sSf -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$FULL_URL")
+          echo "$token_response"
           echo "$token_response" | jq -r '.value' > oidc_token.txt
 
-          echo "::add-mask::$(cat oidc_token.txt)"
+          #echo "::add-mask::$(cat oidc_token.txt)"
 
       - name: Exchange OIDC token with Atmos Pro API
         id: exchange-token
@@ -34,6 +35,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d "{\"token\": \"$TOKEN\",\"workspaceId\":\"ws_2UixCVnf1KrnkvViUyvT4kaWvcvD\"}")
 
+          echo "$token_response"
           echo "$token_reposonse"|jq
 
           body=$(echo "$response" | head -n1)
@@ -48,8 +50,9 @@ jobs:
           fi
 
           # Extract the JWT from the 'token' field in the response body
+          echo "$body"
           echo "$body" | jq -r '.data.token' > jwt.txt
-          echo "::add-mask::$(cat jwt.txt)"
+          #echo "::add-mask::$(cat jwt.txt)"
           echo "✅ Token exchange successful"
 
       - name: Call protected /api/auth/test endpoint
