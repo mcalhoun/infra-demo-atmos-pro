@@ -35,14 +35,15 @@ jobs:
             -H "Content-Type: application/json" \
             -d "{\"token\": \"$TOKEN\",\"workspaceId\":\"ws_2UixCVnf1KrnkvViUyvT4kaWvcvD\"}")
 
-          echo "$token_response"
-          echo "$token_reposonse"|jq
+          # Remove these broken lines:
+          # echo "$token_response"
+          # echo "$token_reposonse"|jq
 
           body=$(echo "$response" | head -n1)
           code=$(echo "$response" | tail -n1)
 
           echo "Status: $code"
-          echo "Response: $body"
+          echo "Response body: $body"
 
           if [ "$code" -ne 200 ]; then
             echo "❌ Token exchange failed"
@@ -50,14 +51,18 @@ jobs:
           fi
 
           # Extract the JWT from the 'token' field in the response body
-          echo "$body"
-          echo "$body" | jq -r '.data.token' > jwt.txt
+          jwt_token=$(echo "$body" | jq -r '.data.token')
+          echo "Extracted JWT length: ${#jwt_token}"
+          echo "JWT starts with: $(echo "$jwt_token" | cut -c1-20)..."
+          
+          echo "$jwt_token" > jwt.txt
           #echo "::add-mask::$(cat jwt.txt)"
           echo "✅ Token exchange successful"
 
       - name: Call protected /api/auth/test endpoint
         run: |
           JWT=$(cat jwt.txt)
+          echo "JWT length for test: ${#JWT}"
 
           echo "Calling /api/auth/test with Bearer token..."
           test_response=$(curl -s -w "\n%{http_code}" -X GET https://ngrok.mattcalhoun.com/api/v1/auth/test \
