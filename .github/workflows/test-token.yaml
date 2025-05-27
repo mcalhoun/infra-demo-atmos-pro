@@ -1,4 +1,4 @@
-name: Test Clerk Auth via GitHub OIDC
+name: Test Atmos Pro Auth via GitHub OIDC
 
 on:
   workflow_dispatch:
